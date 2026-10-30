@@ -6,7 +6,10 @@
   --line: #262626;
   --sans: 'Outfit Variable', system-ui, sans-serif;
   --mono: 'Geist Mono', ui-monospace, monospace;
-  --pad: clamp(20px, 4vw, 56px);
+  --pad: clamp(1.25rem, 4vw, 3.5rem);
+  /* Clear of notches and rounded corners (viewport-fit=cover in Base.astro). */
+  --pad-l: max(var(--pad), env(safe-area-inset-left, 0px));
+  --pad-r: max(var(--pad), env(safe-area-inset-right, 0px));
   color-scheme: dark;
 }
 
@@ -19,13 +22,16 @@
 html {
   background: var(--bg);
   color: var(--ink);
+  /* The user's font size up to laptop screens. Past that everything is in rem
+     and grows with the screen, so a big monitor gets the same page, larger. */
+  font-size: clamp(100%, min(1.11vw, 1.78vh), 250%);
   -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
   font-family: var(--sans);
-  font-size: 17px;
+  font-size: 1.0625rem;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -55,12 +61,12 @@ a {
 .pill {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  height: 40px;
-  padding: 0 18px;
+  gap: 0.5rem;
+  height: 2.5rem;
+  padding: 0 1.125rem;
   border: 1px solid var(--line);
   border-radius: 999px;
-  font-size: 15px;
+  font-size: 0.9375rem;
   text-decoration: none;
   white-space: nowrap;
   transition:
@@ -69,8 +75,15 @@ a {
     color 0.2s;
 }
 
-.pill:hover {
-  border-color: var(--ink);
+.pill svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+@media (hover: hover) {
+  .pill:hover {
+    border-color: var(--ink);
+  }
 }
 
 /* The intro (src/components/Intro.astro) hides these, then fades them in. */

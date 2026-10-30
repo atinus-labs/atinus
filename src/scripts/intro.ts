@@ -59,12 +59,6 @@ export function playIntro(root: HTMLElement, focus?: HTMLElement | null) {
       canvas.height = h;
     }
     const unit = Math.min(w * 0.17, h * 0.12);
-    const cx = w / 2;
-    let cy = h / 2;
-    if (focus) {
-      const box = focus.getBoundingClientRect();
-      cy = Math.max(1.4 * unit, (box.top + box.height / 2) * dpr);
-    }
 
     // Where we are: drawing (p), opening (q), zooming (z).
     const p = clamp01(s / DRAW);
@@ -73,8 +67,18 @@ export function playIntro(root: HTMLElement, focus?: HTMLElement | null) {
     const t = s < DRAW ? easeInOut(p) : 1 + (s - DRAW) / DRAW;
     const count = Math.min(MAX, 2 ** (8 * p ** 1.6));
 
+    // Drawn mid-screen, level with the focus. As the bowl opens, the logo
+    // slides across so the window is centred on it.
+    let cx = w / 2;
+    let cy = h / 2;
+    if (focus) {
+      const box = focus.getBoundingClientRect();
+      cx += ((box.left + box.width / 2) * dpr - cx) * easeInOut(q);
+      cy = Math.max(1.4 * unit, (box.top + box.height / 2) * dpr);
+    }
+
     // Fly in until the bowl's inside covers the screen.
-    const end = Math.hypot(w, h) / 2 / (HOLE * unit);
+    const end = Math.hypot(Math.max(cx, w - cx), Math.max(cy, h - cy)) / (HOLE * unit);
     const scale = end ** (z ** 2.2);
     const r = unit * scale;
 
@@ -159,7 +163,7 @@ export function playIntro(root: HTMLElement, focus?: HTMLElement | null) {
       shown = n;
       label.textContent = `${n} ${n === 1 ? 'circle' : 'circles'}`;
     }
-    label.style.top = `${(cy + 1.16 * unit) / dpr + 36}px`;
+    label.style.top = `calc(${(cy + 1.16 * unit) / dpr}px + 2.25rem)`;
     label.style.opacity = String(s > 0 ? fade : 0);
 
     if (q > 0) html.classList.add('opening');

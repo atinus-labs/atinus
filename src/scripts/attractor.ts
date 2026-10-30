@@ -123,27 +123,36 @@ export function startAttractor({ canvas, stage, onParams }: Options): boolean {
   let exposure = 1;
   let filled = 0; // frames drawn since the buffer was cleared
 
+  let fitted = '';
+
+  // Called every frame: the stage can move without the canvas changing size
+  // (fonts loading, the layout switching on rotation).
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
     const box = canvas.getBoundingClientRect();
+    const s = stage.getBoundingClientRect();
     const w = Math.max(1, Math.round(box.width * dpr));
     const h = Math.max(1, Math.round(box.height * dpr));
-    if (w === width && h === height) return;
-    width = canvas.width = w;
-    height = canvas.height = h;
+    const key = [w, h, s.left - box.left, s.top - box.top, s.width, s.height].map(Math.round).join();
+    if (key === fitted && w === width) return;
+    fitted = key;
 
-    gl!.bindTexture(gl!.TEXTURE_2D, texture);
-    gl!.texImage2D(gl!.TEXTURE_2D, 0, gl!.RGBA16F, w, h, 0, gl!.RGBA, gl!.HALF_FLOAT, null);
-    gl!.texParameteri(gl!.TEXTURE_2D, gl!.TEXTURE_MIN_FILTER, gl!.NEAREST);
-    gl!.texParameteri(gl!.TEXTURE_2D, gl!.TEXTURE_MAG_FILTER, gl!.NEAREST);
+    if (w !== width || h !== height) {
+      width = canvas.width = w;
+      height = canvas.height = h;
+      gl!.bindTexture(gl!.TEXTURE_2D, texture);
+      gl!.texImage2D(gl!.TEXTURE_2D, 0, gl!.RGBA16F, w, h, 0, gl!.RGBA, gl!.HALF_FLOAT, null);
+      gl!.texParameteri(gl!.TEXTURE_2D, gl!.TEXTURE_MIN_FILTER, gl!.NEAREST);
+      gl!.texParameteri(gl!.TEXTURE_2D, gl!.TEXTURE_MAG_FILTER, gl!.NEAREST);
+      gl!.bindFramebuffer(gl!.FRAMEBUFFER, fbo);
+      gl!.framebufferTexture2D(gl!.FRAMEBUFFER, gl!.COLOR_ATTACHMENT0, gl!.TEXTURE_2D, texture, 0);
+    }
     gl!.bindFramebuffer(gl!.FRAMEBUFFER, fbo);
-    gl!.framebufferTexture2D(gl!.FRAMEBUFFER, gl!.COLOR_ATTACHMENT0, gl!.TEXTURE_2D, texture, 0);
     gl!.clearColor(0, 0, 0, 0);
     gl!.clear(gl!.COLOR_BUFFER_BIT);
     filled = 0;
 
     // Fit the attractor's box inside the stage, in clip space.
-    const s = stage.getBoundingClientRect();
     const k = Math.min(s.width / (2 * EXTENT_X), s.height / (2 * EXTENT_Y));
     const cx = s.left + s.width / 2 - box.left;
     const cy = s.top + s.height / 2 - box.top;
@@ -275,10 +284,12 @@ export function startAttractor({ canvas, stage, onParams }: Options): boolean {
     last = 0;
     wake();
   });
-  new ResizeObserver(() => {
+  const relayout = new ResizeObserver(() => {
     if (reduced.matches) frame = 0;
     wake();
-  }).observe(canvas);
+  });
+  relayout.observe(canvas);
+  relayout.observe(stage);
   canvas.addEventListener('webglcontextlost', () => {
     cancelAnimationFrame(raf);
     canvas.dispatchEvent(new Event('attractor:failed', { bubbles: true }));
