@@ -1,0 +1,86 @@
+:root {
+  --bg: #090909;
+  --ink: #eeeeee;
+  --mute: #8c8c8c;
+  --dim: #5c5c5c;
+  --line: #262626;
+  --sans: 'Outfit Variable', system-ui, sans-serif;
+  --mono: 'Geist Mono', ui-monospace, monospace;
+  --pad: clamp(20px, 4vw, 56px);
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+p,
+figure {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+::selection {
+  background: var(--ink);
+  color: var(--bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 18px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 15px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+}
+
+.pill:hover {
+  border-color: var(--ink);
+}
+
+/* The intro (src/components/Intro.astro) hides these, then fades them in. */
+.reveal {
+  transition:
+    opacity 1s cubic-bezier(0.2, 0.7, 0.2, 1) var(--delay, 0s),
+    transform 1s cubic-bezier(0.2, 0.7, 0.2, 1) var(--delay, 0s);
+}
+
+.intro:not(.revealing) .reveal {
+  opacity: 0;
+  transform: translateY(16px);
+}
