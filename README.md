@@ -8,7 +8,7 @@ pnpm dev      # http://localhost:4321
 pnpm build    # static site in dist/, deploy it anywhere
 ```
 
-Set `SITE_URL` in `.env` to the real domain before building, so the canonical and share-image URLs are right.
+Canonical and share-image URLs use https://www.atinus.co (the bare domain redirects there). Set `SITE_URL` (in `.env` or the host's settings) to build for another address.
 
 ## The page
 
